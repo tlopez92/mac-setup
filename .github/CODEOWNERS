@@ -1,0 +1,6 @@
+# Global owners
+* @tlopez92
+
+# Specific file owners (examples)
+/makefile @tlopez92
+/.github/ @tlopez92
