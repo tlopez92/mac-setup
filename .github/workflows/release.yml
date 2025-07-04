@@ -1,0 +1,213 @@
+name: Automated Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip release]')"
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          # Get the latest tag, default to v1.0.0 if none exists
+          latest_tag=$(git tag -l "v*" | sort -V | tail -n1)
+          if [ -z "$latest_tag" ]; then
+            latest_tag="v1.0.0"
+          fi
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+          echo "Latest tag: $latest_tag"
+
+      - name: Determine version increment
+        id: version_increment
+        run: |
+          # Determine increment type from commit message or manual input
+          commit_message="${{ github.event.head_commit.message }}"
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            increment_type="${{ github.event.inputs.version_type }}"
+          elif echo "$commit_message" | grep -q "\[major\]"; then
+            increment_type="major"
+          elif echo "$commit_message" | grep -q "\[minor\]"; then
+            increment_type="minor"
+          else
+            increment_type="patch"
+          fi
+          
+          echo "increment_type=$increment_type" >> $GITHUB_OUTPUT
+          echo "Version increment type: $increment_type"
+
+      - name: Calculate next version
+        id: next_version
+        run: |
+          latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
+          increment_type="${{ steps.version_increment.outputs.increment_type }}"
+          
+          # Remove 'v' prefix and split version
+          version=${latest_tag#v}
+          IFS='.' read -r major minor patch <<< "$version"
+          
+          # Increment based on type
+          case $increment_type in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+          
+          new_version="v${major}.${minor}.${patch}"
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "Next version: $new_version"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          new_version="${{ steps.next_version.outputs.new_version }}"
+          if git tag -l | grep -q "^${new_version}$"; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $new_version already exists, skipping release"
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $new_version does not exist, proceeding with release"
+          fi
+
+      - name: Generate release notes
+        id: release_notes
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          new_version="${{ steps.next_version.outputs.new_version }}"
+          latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
+          increment_type="${{ steps.version_increment.outputs.increment_type }}"
+          
+          # Get commits since last tag
+          if [ "$latest_tag" != "v1.0.0" ] || git tag -l | grep -q "^${latest_tag}$"; then
+            commits=$(git log ${latest_tag}..HEAD --oneline --no-merges)
+          else
+            commits=$(git log --oneline --no-merges -10)
+          fi
+          
+          # Generate release notes
+          cat > release_notes.md << 'EOF'
+          ## 🚀 Mac Development Environment Setup ${{ steps.next_version.outputs.new_version }}
+          
+          **Automated release with latest improvements and updates.**
+          
+          ### 📋 Changes in this release:
+          
+          EOF
+          
+          if [ -n "$commits" ]; then
+            echo "$commits" | while read line; do
+              echo "- $line" >> release_notes.md
+            done
+          else
+            echo "- Initial automated release setup" >> release_notes.md
+          fi
+          
+          cat >> release_notes.md << 'EOF'
+          
+          ### 🛠 Installation
+          
+          ```bash
+          git clone https://github.com/tlopez92/mac-setup.git
+          cd mac-setup
+          make all
+          ```
+          
+          ### 📚 Documentation
+          
+          - [README](README.md) - Complete setup guide
+          - [Contributing](CONTRIBUTING.md) - Development guidelines  
+          - [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+          
+          ### 🔄 Upgrade from previous version
+          
+          ```bash
+          cd mac-setup
+          git pull origin main
+          make all
+          ```
+          
+          ---
+          
+          **🤖 This release was automatically generated**
+          EOF
+          
+          echo "Release notes generated for $new_version"
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          new_version="${{ steps.next_version.outputs.new_version }}"
+          increment_type="${{ steps.version_increment.outputs.increment_type }}"
+          
+          # Create annotated tag
+          git tag -a "$new_version" -m "Release $new_version
+
+          Automated $increment_type version increment.
+          
+          This release includes the latest updates and improvements to the Mac Development Environment Setup.
+          
+          Generated automatically by GitHub Actions."
+          
+          # Push tag
+          git push origin "$new_version"
+          echo "Created and pushed tag: $new_version"
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.next_version.outputs.new_version }}
+          name: "Release ${{ steps.next_version.outputs.new_version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output results
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          echo "✅ Successfully created release ${{ steps.next_version.outputs.new_version }}"
+          echo "🔗 View release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.next_version.outputs.new_version }}"
+          
+      - name: Skip release notification
+        if: steps.check_tag.outputs.tag_exists == 'true'
+        run: |
+          echo "⏭️ Skipped release creation - tag already exists or marked to skip"
