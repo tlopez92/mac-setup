@@ -19,7 +19,6 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip release]')"
     
     steps:
       - name: Checkout code
@@ -28,12 +27,34 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug commit info
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Commit message: ${{ github.event.head_commit.message }}"
+
+      - name: Check if should skip release
+        id: skip_check
+        run: |
+          commit_message="${{ github.event.head_commit.message }}"
+          if [[ "$commit_message" == *"[skip release]"* ]]; then
+            echo "should_skip=true" >> $GITHUB_OUTPUT
+            echo "⏭️ Skipping release due to [skip release] in commit message"
+          else
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+            echo "✅ Proceeding with release creation"
+          fi
+
       - name: Configure Git
+        if: steps.skip_check.outputs.should_skip == 'false'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
       - name: Get latest tag
+        if: steps.skip_check.outputs.should_skip == 'false'
         id: get_tag
         run: |
           # Get the latest tag, default to v1.0.0 if none exists
@@ -45,6 +66,7 @@ jobs:
           echo "Latest tag: $latest_tag"
 
       - name: Determine version increment
+        if: steps.skip_check.outputs.should_skip == 'false'
         id: version_increment
         run: |
           # Determine increment type from commit message or manual input
@@ -64,6 +86,7 @@ jobs:
           echo "Version increment type: $increment_type"
 
       - name: Calculate next version
+        if: steps.skip_check.outputs.should_skip == 'false'
         id: next_version
         run: |
           latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
@@ -94,6 +117,7 @@ jobs:
           echo "Next version: $new_version"
 
       - name: Check if tag already exists
+        if: steps.skip_check.outputs.should_skip == 'false'
         id: check_tag
         run: |
           new_version="${{ steps.next_version.outputs.new_version }}"
@@ -107,7 +131,7 @@ jobs:
 
       - name: Generate release notes
         id: release_notes
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.skip_check.outputs.should_skip == 'false' && steps.check_tag.outputs.tag_exists == 'false'
         run: |
           new_version="${{ steps.next_version.outputs.new_version }}"
           latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
@@ -170,7 +194,7 @@ jobs:
           echo "Release notes generated for $new_version"
 
       - name: Create and push tag
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.skip_check.outputs.should_skip == 'false' && steps.check_tag.outputs.tag_exists == 'false'
         run: |
           new_version="${{ steps.next_version.outputs.new_version }}"
           increment_type="${{ steps.version_increment.outputs.increment_type }}"
@@ -189,7 +213,7 @@ jobs:
           echo "Created and pushed tag: $new_version"
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.skip_check.outputs.should_skip == 'false' && steps.check_tag.outputs.tag_exists == 'false'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.next_version.outputs.new_version }}
@@ -202,12 +226,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Output results
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.skip_check.outputs.should_skip == 'false' && steps.check_tag.outputs.tag_exists == 'false'
         run: |
           echo "✅ Successfully created release ${{ steps.next_version.outputs.new_version }}"
           echo "🔗 View release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.next_version.outputs.new_version }}"
           
       - name: Skip release notification
-        if: steps.check_tag.outputs.tag_exists == 'true'
+        if: steps.skip_check.outputs.should_skip == 'true'
         run: |
-          echo "⏭️ Skipped release creation - tag already exists or marked to skip"
+          echo "⏭️ Skipped release creation - [skip release] found in commit message"
+          
+      - name: Tag exists notification
+        if: steps.skip_check.outputs.should_skip == 'false' && steps.check_tag.outputs.tag_exists == 'true'
+        run: |
+          echo "⏭️ Skipped release creation - tag already exists"
