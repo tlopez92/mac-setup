@@ -33,9 +33,9 @@
 <!-- Describe the testing that has been performed -->
 
 #### Test Environment
-- [ ] macOS 12 (Monterey)
 - [ ] macOS 13 (Ventura)
 - [ ] macOS 14 (Sonoma)
+- [ ] macOS 15 (Sequoia)
 - [ ] Intel Mac
 - [ ] Apple Silicon Mac
 
