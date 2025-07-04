@@ -15,6 +15,12 @@ on:
         - minor
         - major
 
+permissions:
+  contents: write
+  packages: write
+  actions: read
+  checks: read
+
 jobs:
   release:
     name: Create Release
@@ -25,7 +31,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Debug commit info
         run: |
