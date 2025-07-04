@@ -28,17 +28,29 @@ This setup provides a complete development environment with:
 
 ### 💻 Development Tools
 - **Visual Studio Code** - Popular code editor
+- **JetBrains Rider** - Professional .NET IDE
 - **Windsurf** - AI-powered development environment
 - **Claude Code** - AI coding assistant CLI
+- **GitHub Copilot CLI** - AI pair programming in terminal
+- **Ollama** - Run LLMs locally for development
 - **Docker via OrbStack** - Containerization platform
 - **Raycast** - Productivity launcher and automation
 
 ### 🛠 Runtime & Language Support
 - **Node.js via NVM** - JavaScript runtime with version management
 - **Ruby via rbenv** - Ruby runtime with version management
+- **Python 3.12** - Latest Python with pip
+- **Anaconda** - Data science Python distribution
 - **Bun** - Fast JavaScript runtime and package manager
-- **.NET** - Microsoft's development platform
+- **.NET SDK** - Complete .NET development platform
 - **Azure CLI & Functions** - Cloud development tools
+
+### 🗄 Databases & API Tools
+- **PostgreSQL 16** - Advanced relational database
+- **Redis** - In-memory data structure store
+- **MongoDB Community** - NoSQL document database
+- **Postman** - API development and testing
+- **Insomnia** - REST and GraphQL client
 
 ## 🚀 Quick Start
 
@@ -65,9 +77,12 @@ That's it! The setup will automatically install and configure everything for you
 | **WezTerm** | Primary terminal emulator | Homebrew Cask |
 | **Warp** | AI-powered terminal | Homebrew Cask |
 | **Visual Studio Code** | Code editor | Homebrew Cask |
+| **JetBrains Rider** | .NET IDE | Homebrew Cask |
 | **Windsurf** | AI development environment | Homebrew Cask |
 | **Raycast** | Productivity launcher | Homebrew Cask |
 | **OrbStack** | Docker/container management | Homebrew Cask |
+| **Postman** | API testing | Homebrew Cask |
+| **Insomnia** | REST/GraphQL client | Homebrew Cask |
 
 ### 🔧 Command Line Tools
 | Tool | Purpose | Installation Method |
@@ -80,16 +95,23 @@ That's it! The setup will automatically install and configure everything for you
 | **Eza** | Better `ls` command | Homebrew |
 | **Zoxide** | Smart directory navigation | Homebrew |
 | **Claude Code** | AI coding assistant | NPM |
+| **GitHub Copilot CLI** | AI pair programming | GitHub CLI Extension |
+| **Ollama** | Local LLM runtime | Homebrew |
 | **Azure CLI** | Azure cloud tools | Homebrew |
 | **Azure Functions** | Serverless development | Homebrew |
+| **PostgreSQL** | Relational database | Homebrew |
+| **Redis** | In-memory data store | Homebrew |
+| **MongoDB** | NoSQL database | Homebrew |
 
 ### 🏃‍♂️ Runtimes & Version Managers
 | Runtime | Version Manager | Purpose |
 |---------|----------------|---------|
 | **Node.js** | NVM | JavaScript development |
 | **Ruby** | rbenv | Ruby development |
+| **Python 3.12** | Homebrew | Python development |
+| **Anaconda** | Self-managed | Data science Python |
 | **Bun** | Self-managed | Fast JS runtime |
-| **.NET** | Built-in | Microsoft development |
+| **.NET SDK** | Built-in | C#/F# development |
 
 ## 🎯 Manual Steps
 
@@ -151,10 +173,19 @@ You can install individual components instead of everything:
 make zsh homebrew font p10k zsh-autosuggestions zsh-syntax-highlighting
 
 # Install just development tools
-make nvm rbenv bun vscode windsurf claude-code
+make nvm rbenv bun python anaconda vscode rider windsurf claude-code
+
+# Install just AI/ML tools  
+make ollama github-copilot claude-code
+
+# Install just .NET development
+make dotnet rider azure azure-functions
+
+# Install just databases
+make postgresql redis mongodb
 
 # Install just productivity apps
-make raycast warp orbstack
+make raycast warp orbstack postman
 
 # Setup just the shell configuration
 make setup_zshrc
