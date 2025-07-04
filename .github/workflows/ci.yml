@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-12, macos-13, macos-14]
+      fail-fast: false
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Makefile syntax
+        run: |
+          make -n all
+
+      - name: Check individual target syntax
+        run: |
+          # Test individual targets that don't require sudo
+          make -n homebrew
+          make -n git
+          make -n font
+          make -n p10k
+          make -n eza
+          make -n zoxide
+          make -n setup_zshrc
+
+      - name: Validate shell script syntax
+        run: |
+          # Check any shell scripts for syntax errors
+          find . -name "*.sh" -exec bash -n {} \; || echo "No shell scripts found"
+
+      - name: Test Homebrew availability
+        run: |
+          # Check if Homebrew is available (it should be on GitHub Actions)
+          if command -v brew >/dev/null 2>&1; then
+            echo "✅ Homebrew is available"
+            brew --version
+          else
+            echo "❌ Homebrew not found"
+            exit 1
+          fi
+
+      - name: Test makefile variables and functions
+        run: |
+          # Test that makefile variables expand correctly
+          echo "Testing makefile variable expansion..."
+          make -n setup_zshrc | head -5
+
+  lint:
+    name: Lint Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v13
+        with:
+          globs: '**/*.md'
+          config: |
+            {
+              "MD013": false,
+              "MD033": false,
+              "MD041": false
+            }
+
+      - name: Check for broken links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run security scan
+        run: |
+          # Check for potential security issues in makefile
+          echo "Checking for hardcoded secrets..."
+          if grep -r "password\|secret\|key\|token" makefile; then
+            echo "❌ Potential secrets found in makefile"
+            exit 1
+          else
+            echo "✅ No obvious secrets found"
+          fi
+
+      - name: Check file permissions
+        run: |
+          # Ensure makefile has appropriate permissions
+          ls -la makefile
+          if [ "$(stat -c %a makefile)" = "644" ] || [ "$(stat -c %a makefile)" = "755" ]; then
+            echo "✅ Makefile permissions are appropriate"
+          else
+            echo "⚠️ Makefile permissions may need review"
+          fi
