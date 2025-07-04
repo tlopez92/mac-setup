@@ -1,8 +1,8 @@
 # Makefile for setting up Mac development environment
 
-.PHONY: all zsh homebrew oh-my-zsh wezterm git font wezterm-config p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide docker azure azure-functions raycast orbstack warp windsurf vscode claude-code nvm rbenv bun setup_zshrc
+.PHONY: all zsh homebrew oh-my-zsh wezterm git font wezterm-config p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide docker azure azure-functions raycast orbstack warp windsurf vscode claude-code nvm rbenv bun dotnet rider jetbrains-toolbox python anaconda ollama github-copilot postman insomnia postgresql redis mongodb setup_zshrc
 
-all: zsh homebrew oh-my-zsh git font p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide nvm rbenv bun raycast orbstack warp windsurf vscode claude-code setup_zshrc
+all: zsh homebrew oh-my-zsh git font p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide nvm rbenv bun dotnet python anaconda raycast orbstack warp windsurf vscode rider claude-code ollama github-copilot postman postgresql redis setup_zshrc
 
 zsh:
 	@echo "Checking shell..."
@@ -161,6 +161,118 @@ claude-code:
 		npm install -g @anthropic-ai/claude-code; \
 	else \
 		echo "Claude Code is already installed."; \
+	fi
+
+dotnet:
+	@echo "Installing .NET SDK..."
+	@if ! command -v dotnet >/dev/null 2>&1; then \
+		brew install --cask dotnet-sdk; \
+	else \
+		echo ".NET SDK is already installed."; \
+		dotnet --version; \
+	fi
+
+rider:
+	@echo "Installing JetBrains Rider..."
+	@if ! ls /Applications/Rider.app >/dev/null 2>&1; then \
+		brew install --cask rider; \
+	else \
+		echo "JetBrains Rider is already installed."; \
+	fi
+
+jetbrains-toolbox:
+	@echo "Installing JetBrains Toolbox..."
+	@if ! ls /Applications/JetBrains\ Toolbox.app >/dev/null 2>&1; then \
+		brew install --cask jetbrains-toolbox; \
+	else \
+		echo "JetBrains Toolbox is already installed."; \
+	fi
+
+python:
+	@echo "Installing Python..."
+	@if ! brew list python@3.12 >/dev/null 2>&1; then \
+		brew install python@3.12; \
+		echo 'export PATH="/opt/homebrew/opt/python@3.12/bin:$$PATH"' >> ~/.zshrc; \
+	else \
+		echo "Python is already installed."; \
+		python3 --version; \
+	fi
+
+anaconda:
+	@echo "Installing Anaconda..."
+	@if ! command -v conda >/dev/null 2>&1; then \
+		brew install --cask anaconda; \
+		echo 'export PATH="/opt/homebrew/anaconda3/bin:$$PATH"' >> ~/.zshrc; \
+	else \
+		echo "Anaconda is already installed."; \
+		conda --version; \
+	fi
+
+ollama:
+	@echo "Installing Ollama (Local LLM)..."
+	@if ! command -v ollama >/dev/null 2>&1; then \
+		brew install ollama; \
+		echo "Starting Ollama service..."; \
+		brew services start ollama; \
+	else \
+		echo "Ollama is already installed."; \
+		ollama --version; \
+	fi
+
+github-copilot:
+	@echo "GitHub Copilot CLI..."
+	@if ! command -v gh >/dev/null 2>&1; then \
+		brew install gh; \
+	fi
+	@if ! gh extension list | grep -q "github/gh-copilot"; then \
+		gh extension install github/gh-copilot; \
+	else \
+		echo "GitHub Copilot CLI is already installed."; \
+	fi
+
+postman:
+	@echo "Installing Postman..."
+	@if ! ls /Applications/Postman.app >/dev/null 2>&1; then \
+		brew install --cask postman; \
+	else \
+		echo "Postman is already installed."; \
+	fi
+
+insomnia:
+	@echo "Installing Insomnia..."
+	@if ! ls /Applications/Insomnia.app >/dev/null 2>&1; then \
+		brew install --cask insomnia; \
+	else \
+		echo "Insomnia is already installed."; \
+	fi
+
+postgresql:
+	@echo "Installing PostgreSQL..."
+	@if ! brew list postgresql@16 >/dev/null 2>&1; then \
+		brew install postgresql@16; \
+		brew services start postgresql@16; \
+		echo 'export PATH="/opt/homebrew/opt/postgresql@16/bin:$$PATH"' >> ~/.zshrc; \
+	else \
+		echo "PostgreSQL is already installed."; \
+	fi
+
+redis:
+	@echo "Installing Redis..."
+	@if ! brew list redis >/dev/null 2>&1; then \
+		brew install redis; \
+		brew services start redis; \
+	else \
+		echo "Redis is already installed."; \
+	fi
+
+mongodb:
+	@echo "Installing MongoDB..."
+	@if ! brew list mongodb-community >/dev/null 2>&1; then \
+		brew tap mongodb/brew; \
+		brew install mongodb-community; \
+		brew services start mongodb-community; \
+	else \
+		echo "MongoDB is already installed."; \
 	fi
 
 setup_zshrc:
