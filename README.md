@@ -43,7 +43,9 @@ This setup provides a complete development environment with:
 - **Anaconda** - Data science Python distribution
 - **Bun** - Fast JavaScript runtime and package manager
 - **.NET SDK** - Complete .NET development platform
-- **Azure CLI & Functions** - Cloud development tools
+- **Azure CLI & Functions** - Microsoft cloud development
+- **AWS CLI** - Amazon cloud services management
+- **Terraform** - Infrastructure as Code tool
 
 ### 🗄 Databases & API Tools
 - **PostgreSQL 16** - Advanced relational database
@@ -99,6 +101,8 @@ That's it! The setup will automatically install and configure everything for you
 | **Ollama** | Local LLM runtime | Homebrew |
 | **Azure CLI** | Azure cloud tools | Homebrew |
 | **Azure Functions** | Serverless development | Homebrew |
+| **AWS CLI** | AWS cloud management | Homebrew |
+| **Terraform** | Infrastructure as Code | Homebrew |
 | **PostgreSQL** | Relational database | Homebrew |
 | **Redis** | In-memory data store | Homebrew |
 | **MongoDB** | NoSQL database | Homebrew |
@@ -179,7 +183,10 @@ make nvm rbenv bun python anaconda vscode rider windsurf claude-code
 make ollama github-copilot claude-code
 
 # Install just .NET development
-make dotnet rider azure azure-functions
+make dotnet rider
+
+# Install just cloud/infrastructure tools
+make aws terraform azure azure-functions
 
 # Install just databases
 make postgresql redis mongodb

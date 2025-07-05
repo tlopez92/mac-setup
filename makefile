@@ -1,8 +1,8 @@
 # Makefile for setting up Mac development environment
 
-.PHONY: all zsh homebrew oh-my-zsh wezterm git font wezterm-config p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide docker azure azure-functions raycast orbstack warp windsurf vscode claude-code nvm rbenv bun dotnet rider jetbrains-toolbox python anaconda ollama github-copilot postman insomnia postgresql redis mongodb setup_zshrc
+.PHONY: all zsh homebrew oh-my-zsh wezterm git font wezterm-config p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide docker azure azure-functions aws terraform raycast orbstack warp windsurf vscode claude-code nvm rbenv bun dotnet rider jetbrains-toolbox python anaconda ollama github-copilot postman insomnia postgresql redis mongodb setup_zshrc
 
-all: zsh homebrew oh-my-zsh git font p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide nvm rbenv bun dotnet python anaconda raycast orbstack warp windsurf vscode rider claude-code ollama github-copilot postman postgresql redis setup_zshrc
+all: zsh homebrew oh-my-zsh git font p10k zsh-autosuggestions zsh-syntax-highlighting eza zoxide nvm rbenv bun dotnet python anaconda raycast orbstack warp windsurf vscode rider claude-code ollama github-copilot postman postgresql redis aws terraform setup_zshrc
 
 zsh:
 	@echo "Checking shell..."
@@ -75,6 +75,26 @@ azure-functions:
 	@echo "Installing Azure Functions Core Tools..."
 	brew tap azure/functions
 	brew install azure-functions-core-tools@4
+
+aws:
+	@echo "Installing AWS CLI..."
+	@if ! command -v aws >/dev/null 2>&1; then \
+		brew install awscli; \
+		echo "AWS CLI installed. Run 'aws configure' to set up credentials."; \
+	else \
+		echo "AWS CLI is already installed."; \
+		aws --version; \
+	fi
+
+terraform:
+	@echo "Installing Terraform..."
+	@if ! command -v terraform >/dev/null 2>&1; then \
+		brew tap hashicorp/tap; \
+		brew install hashicorp/tap/terraform; \
+	else \
+		echo "Terraform is already installed."; \
+		terraform version; \
+	fi
 
 oh-my-zsh:
 	@echo "Installing Oh My Zsh..."
