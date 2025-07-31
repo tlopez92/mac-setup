@@ -50,6 +50,12 @@ zsh-autosuggestions:
 zsh-syntax-highlighting:
 	@echo "Installing zsh-syntax-highlighting..."
 	brew install zsh-syntax-highlighting
+	@echo "Installing zsh-syntax-highlighting as Oh My Zsh plugin..."
+	@if [ ! -d "$$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ]; then \
+		git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting; \
+	else \
+		echo "zsh-syntax-highlighting plugin already installed"; \
+	fi
 
 eza:
 	@echo "Installing eza (better ls)..."
@@ -174,6 +180,18 @@ vscode:
 	else \
 		echo "Visual Studio Code is already installed."; \
 	fi
+	@echo "Setting up 'code' command in PATH..."
+	@if ! command -v code >/dev/null 2>&1; then \
+		if [ -d "/Applications/Visual Studio Code.app/Contents/Resources/app/bin" ]; then \
+			ln -sf "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" /usr/local/bin/code 2>/dev/null || \
+			sudo ln -sf "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" /usr/local/bin/code; \
+			echo "'code' command has been added to PATH"; \
+		else \
+			echo "VS Code bin directory not found. Please open VS Code and use Command Palette: 'Shell Command: Install code command in PATH'"; \
+		fi; \
+	else \
+		echo "'code' command is already available"; \
+	fi
 
 claude-code:
 	@echo "Installing Claude Code..."
@@ -297,4 +315,4 @@ mongodb:
 
 setup_zshrc:
 	@echo "Setting up .zshrc..."
-	@echo '# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.\n# Initialization code that may require console input (password prompts, [y/n]\n# confirmations, etc.) must go above this block; everything else may go below.\nif [[ -r "$$HOME/.cache/p10k-instant-prompt-$${(%):-%n}.zsh" ]]; then\n  source "$$HOME/.cache/p10k-instant-prompt-$${(%):-%n}.zsh"\nfi\n\n# PATH configuration\nexport PATH="/usr/local/share/dotnet:$$PATH"\n\n# Oh My Zsh configuration\nexport ZSH="$$HOME/.oh-my-zsh"\nZSH_THEME="powerlevel10k/powerlevel10k"\nplugins=(git zsh-autosuggestions)\n\nsource $$ZSH/oh-my-zsh.sh\n\n# Sourcing additional plugins and themes\nsource $$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh\nsource $$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh\n\n# Powerlevel10k configuration\n[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n\n# History setup\nHISTFILE=$$HOME/.zhistory\nSAVEHIST=1000\nHISTSIZE=999\nsetopt share_history\nsetopt hist_expire_dups_first\nsetopt hist_ignore_dups\nsetopt hist_verify\n\n# Key bindings for history search\nbindkey "^[[A" history-search-backward\nbindkey "^[[B" history-search-forward\n\n# Aliases and utilities\nalias ls="eza --icons=always"\neval "$$(zoxide init zsh)"\nalias cd="z"\n\n# NVM configuration - updated for latest LTS\nexport NVM_DIR="$$HOME/.nvm"\n[ -s "$$NVM_DIR/nvm.sh" ] && \\. "$$NVM_DIR/nvm.sh"  # This loads nvm\n[ -s "$$NVM_DIR/bash_completion" ] && \\. "$$NVM_DIR/bash_completion"  # This loads nvm bash_completion\n# Use default Node version (will be set to latest LTS)\nnvm use default --silent 2>/dev/null || nvm use --lts --silent\n\n# Ruby configuration\neval "$$(rbenv init - zsh)"\n\n# Added by Windsurf\nexport PATH="/Users/tj/.codeium/windsurf/bin:$$PATH"\n\n# bun completions\n[ -s "/Users/tj/.bun/_bun" ] && source "/Users/tj/.bun/_bun"\n\n# bun\nexport BUN_INSTALL="$$HOME/.bun"\nexport PATH="$$BUN_INSTALL/bin:$$PATH"' > ~/.zshrc
+	@echo '# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.\n# Initialization code that may require console input (password prompts, [y/n]\n# confirmations, etc.) must go above this block; everything else may go below.\nif [[ -r "$$HOME/.cache/p10k-instant-prompt-$${(%):-%n}.zsh" ]]; then\n  source "$$HOME/.cache/p10k-instant-prompt-$${(%):-%n}.zsh"\nfi\n\n# Homebrew configuration (needs to be early for other tools)\nif [[ -f "/opt/homebrew/bin/brew" ]]; then\n  eval "$$(/opt/homebrew/bin/brew shellenv)"\nelif [[ -f "/usr/local/bin/brew" ]]; then\n  eval "$$(/usr/local/bin/brew shellenv)"\nfi\n\n# PATH configuration\nexport PATH="/usr/local/share/dotnet:$$PATH"\n\n# Oh My Zsh configuration\nexport ZSH="$$HOME/.oh-my-zsh"\nZSH_THEME="powerlevel10k/powerlevel10k"\nplugins=(git zsh-autosuggestions zsh-syntax-highlighting)\n\nsource $$ZSH/oh-my-zsh.sh\n\n# Powerlevel10k configuration\n[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n\n# History setup\nHISTFILE=$$HOME/.zhistory\nSAVEHIST=1000\nHISTSIZE=999\nsetopt share_history\nsetopt hist_expire_dups_first\nsetopt hist_ignore_dups\nsetopt hist_verify\n\n# Key bindings for history search\nbindkey "^[[A" history-search-backward\nbindkey "^[[B" history-search-forward\n\n# Aliases and utilities\nalias ls="eza --icons=always"\neval "$$(zoxide init zsh)"\nalias cd="z"\n\n# NVM configuration - updated for latest LTS\nexport NVM_DIR="$$HOME/.nvm"\n[ -s "$$NVM_DIR/nvm.sh" ] && \\. "$$NVM_DIR/nvm.sh"  # This loads nvm\n[ -s "$$NVM_DIR/bash_completion" ] && \\. "$$NVM_DIR/bash_completion"  # This loads nvm bash_completion\n# Use default Node version (will be set to latest LTS)\nnvm use default --silent 2>/dev/null || nvm use --lts --silent\n\n# Ruby configuration\neval "$$(rbenv init - zsh)"\n\n# Added by Windsurf\nexport PATH="$$HOME/.codeium/windsurf/bin:$$PATH"\n\n# bun completions\n[ -s "$$HOME/.bun/_bun" ] && source "$$HOME/.bun/_bun"\n\n# bun\nexport BUN_INSTALL="$$HOME/.bun"\nexport PATH="$$BUN_INSTALL/bin:$$PATH"' > ~/.zshrc
