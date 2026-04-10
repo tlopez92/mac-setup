@@ -377,11 +377,20 @@ claude-code: node
 github-copilot: homebrew
 	@echo "Ensuring GitHub CLI is installed..."
 	@brew list --formula gh >/dev/null 2>&1 || brew install gh
-	@echo "Ensuring GitHub Copilot CLI extension is installed..."
-	@if gh extension list | grep -q 'github/gh-copilot'; then \
-		echo "GitHub Copilot CLI is already installed."; \
+	@echo "Ensuring GitHub Copilot CLI is available..."
+	@if gh copilot --help >/dev/null 2>&1; then \
+		echo "GitHub Copilot CLI is already available."; \
+	elif gh extension list 2>/dev/null | grep -q 'github/gh-copilot'; then \
+		echo "GitHub Copilot CLI extension is already installed."; \
 	else \
-		gh extension install github/gh-copilot; \
+		if gh extension install github/gh-copilot; then \
+			echo "Installed GitHub Copilot CLI extension."; \
+		elif gh copilot --help >/dev/null 2>&1; then \
+			echo "GitHub Copilot CLI is available despite the install conflict; continuing."; \
+		else \
+			echo "Could not install GitHub Copilot CLI."; \
+			exit 1; \
+		fi; \
 	fi
 
 ollama: homebrew
