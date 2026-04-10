@@ -39,7 +39,7 @@ This setup provides a complete development environment with:
 ### 🛠 Runtime & Language Support
 - **Node.js via NVM** - JavaScript runtime with version management
 - **Ruby via rbenv** - Ruby runtime with version management
-- **Python 3.12** - Latest Python with pip
+- **Python 3** - Latest Homebrew Python with pip
 - **Anaconda** - Data science Python distribution
 - **Bun** - Fast JavaScript runtime and package manager
 - **.NET SDK** - Complete .NET development platform
@@ -48,7 +48,7 @@ This setup provides a complete development environment with:
 - **Terraform** - Infrastructure as Code tool
 
 ### 🗄 Databases & API Tools
-- **PostgreSQL 16** - Advanced relational database
+- **PostgreSQL** - Advanced relational database
 - **Redis** - In-memory data structure store
 - **MongoDB Community** - NoSQL document database
 - **Postman** - API development and testing
@@ -70,6 +70,8 @@ make all
 ```
 
 That's it! The setup will automatically install and configure everything for you.
+
+The bootstrap is idempotent and avoids overwriting existing dotfiles. It manages shell additions through `~/.zprofile.mac-setup` and `~/.zshrc.mac-setup`, then sources those from your regular shell files.
 
 ## 📋 What Gets Installed
 
@@ -112,7 +114,7 @@ That's it! The setup will automatically install and configure everything for you
 |---------|----------------|---------|
 | **Node.js** | NVM | JavaScript development |
 | **Ruby** | rbenv | Ruby development |
-| **Python 3.12** | Homebrew | Python development |
+| **Python 3** | Homebrew | Python development |
 | **Anaconda** | Self-managed | Data science Python |
 | **Bun** | Self-managed | Fast JS runtime |
 | **.NET SDK** | Built-in | C#/F# development |
@@ -144,7 +146,7 @@ p10k configure
 az login
 
 # Configure Claude Code (if using Claude)
-claude-code auth
+claude auth
 ```
 
 ## 🔧 Customization
@@ -161,6 +163,12 @@ Your shell configuration is located at:
 ~/.zshrc
 ```
 
+Managed additions from this repo live in:
+```bash
+~/.zprofile.mac-setup
+~/.zshrc.mac-setup
+```
+
 ### Adding More Tools
 To add additional tools to the setup:
 1. Edit the `makefile`
@@ -173,29 +181,32 @@ To add additional tools to the setup:
 You can install individual components instead of everything:
 
 ```bash
-# Install just the terminal setup
-make zsh homebrew font p10k zsh-autosuggestions zsh-syntax-highlighting
+# Install the core shell + terminal setup
+make core
 
-# Install just development tools
-make nvm rbenv bun python anaconda vscode rider windsurf claude-code
+# Install language runtimes and SDKs
+make languages
 
-# Install just AI/ML tools  
-make ollama github-copilot claude-code
+# Install desktop apps
+make apps
 
-# Install just .NET development
-make dotnet rider
+# Install AI tooling
+make ai
 
-# Install just cloud/infrastructure tools
-make aws terraform azure azure-functions
+# Install cloud/infrastructure tools
+make cloud
 
-# Install just databases
-make postgresql redis mongodb
+# Install local databases
+make data
 
-# Install just productivity apps
-make raycast warp orbstack postman
+# Install opt-in extras that are not part of make all
+make optional
 
 # Setup just the shell configuration
 make setup_zshrc
+
+# Print a quick post-install summary
+make doctor
 ```
 
 ## 🔍 Troubleshooting
@@ -219,6 +230,7 @@ sudo chown -R $(whoami) /usr/local/share/zsh /usr/local/share/zsh/site-functions
 If Node.js isn't available:
 ```bash
 # Reload your shell
+source ~/.zprofile
 source ~/.zshrc
 
 # Install latest LTS Node
@@ -240,8 +252,9 @@ p10k configure
 
 1. **Check the logs**: Most installation steps show detailed output
 2. **Restart your terminal**: Many changes require a fresh terminal session
-3. **Reload your shell**: Run `source ~/.zshrc` after making changes
-4. **Check installed tools**: Use `which <tool>` to verify installation
+3. **Reload your shell**: Run `source ~/.zprofile && source ~/.zshrc` after making changes
+4. **Run doctor**: Use `make doctor` for a quick summary
+5. **Check installed tools**: Use `which <tool>` to verify installation
 
 ## 🤝 Contributing
 
