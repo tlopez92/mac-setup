@@ -115,9 +115,9 @@ Before submitting a PR, test your changes:
 ### CI/CD Testing
 
 Our CI runs on multiple macOS versions:
-- macOS 13 (Ventura) 
-- macOS 14 (Sonoma)
-- macOS 15 (Sequoia)
+- macOS 15 (Intel)
+- macOS 14 (Apple Silicon)
+- macOS 15 (Apple Silicon)
 
 The CI will:
 - Validate makefile syntax
