@@ -40,6 +40,20 @@ define install_cask
 	@brew list --cask $(1) >/dev/null 2>&1 || brew install --cask $(1)
 endef
 
+define install_app_cask
+	@echo "Ensuring Homebrew cask '$(1)' is installed..."
+	@if brew list --cask $(1) >/dev/null 2>&1; then \
+		echo "Homebrew cask '$(1)' is already installed."; \
+	elif [ -d "/Applications/$(2)" ]; then \
+		echo "Found existing /Applications/$(2); attempting to adopt it into Homebrew..."; \
+		brew install --cask --adopt $(1) || { \
+			echo "Could not adopt /Applications/$(2); leaving it in place and continuing."; \
+		}; \
+	else \
+		brew install --cask $(1); \
+	fi
+endef
+
 help:
 	@printf '%s\n' \
 		"make all       Install the default macOS setup." \
@@ -123,7 +137,7 @@ tap-azure-functions: homebrew
 	@brew tap azure/functions >/dev/null
 
 wezterm: homebrew
-	$(call install_cask,wezterm)
+	$(call install_app_cask,wezterm,WezTerm.app)
 
 git: homebrew
 	$(call install_formula,git)
@@ -282,28 +296,28 @@ terraform: tap-hashicorp
 	@brew list --formula terraform >/dev/null 2>&1 || brew install hashicorp/tap/terraform
 
 raycast: homebrew
-	$(call install_cask,raycast)
+	$(call install_app_cask,raycast,Raycast.app)
 
 orbstack: homebrew
-	$(call install_cask,orbstack)
+	$(call install_app_cask,orbstack,OrbStack.app)
 
 warp: homebrew
-	$(call install_cask,warp)
+	$(call install_app_cask,warp,Warp.app)
 
 windsurf: homebrew
-	$(call install_cask,windsurf)
+	$(call install_app_cask,windsurf,Windsurf.app)
 
 vscode: homebrew
-	$(call install_cask,visual-studio-code)
+	$(call install_app_cask,visual-studio-code,Visual Studio Code.app)
 
 dotnet: homebrew
 	$(call install_cask,dotnet-sdk)
 
 rider: homebrew
-	$(call install_cask,rider)
+	$(call install_app_cask,rider,Rider.app)
 
 jetbrains-toolbox: homebrew
-	$(call install_cask,jetbrains-toolbox)
+	$(call install_app_cask,jetbrains-toolbox,JetBrains Toolbox.app)
 
 python: homebrew
 	$(call install_formula,python)
@@ -376,10 +390,10 @@ ollama: homebrew
 	@brew services start ollama >/dev/null || true
 
 postman: homebrew
-	$(call install_cask,postman)
+	$(call install_app_cask,postman,Postman.app)
 
 insomnia: homebrew
-	$(call install_cask,insomnia)
+	$(call install_app_cask,insomnia,Insomnia.app)
 
 postgresql: homebrew
 	$(call install_formula,postgresql)
