@@ -327,7 +327,7 @@ rbenv: homebrew
 	@echo "Ensuring Homebrew formulas 'rbenv' and 'ruby-build' are installed..."
 	@brew list --formula rbenv >/dev/null 2>&1 || brew install rbenv
 	@brew list --formula ruby-build >/dev/null 2>&1 || brew install ruby-build
-	@LATEST_RUBY="$$(rbenv install -l | awk '/^[[:space:]]+[0-9]+\.[0-9]+\.[0-9]+$$/ {gsub(/^[[:space:]]+/, "", $$0); versions[++count] = $$0} END {print versions[count]}')"; \
+	@LATEST_RUBY="$$(rbenv install -l 2>/dev/null | sed 's/^[[:space:]]*//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$$' | tail -1)"; \
 	if [ -n "$$LATEST_RUBY" ]; then \
 		if ! rbenv versions --bare | grep -qx "$$LATEST_RUBY"; then \
 			echo "Installing Ruby $$LATEST_RUBY via rbenv..."; \
