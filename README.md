@@ -227,6 +227,15 @@ If you encounter permission errors:
 sudo chown -R $(whoami) /usr/local/share/zsh /usr/local/share/zsh/site-functions
 ```
 
+#### Command Line Tools Outdated
+If Homebrew says your Apple Command Line Tools are too old, update them from System Settings > General > Software Update.
+
+If macOS does not show an update, run:
+```bash
+sudo rm -rf /Library/Developer/CommandLineTools
+xcode-select --install
+```
+
 #### NVM/Node Issues
 If Node.js isn't available:
 ```bash

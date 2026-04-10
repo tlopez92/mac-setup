@@ -24,7 +24,7 @@ CLOUD_TARGETS := aws terraform
 OPTIONAL_TARGETS := azure azure-functions docker windsurf
 
 .PHONY: help all core languages apps ai data cloud optional doctor \
-	check-macos zsh homebrew tap-hashicorp tap-mongodb tap-azure-functions \
+	check-macos check-developer-tools zsh homebrew tap-hashicorp tap-mongodb tap-azure-functions \
 	oh-my-zsh link-oh-my-zsh-assets setup_shell setup_zshrc wezterm-config wezterm git font p10k \
 	zsh-autosuggestions zsh-syntax-highlighting eza zoxide docker azure azure-functions aws terraform \
 	raycast orbstack warp windsurf vscode claude-code github-copilot dotnet rider jetbrains-toolbox \
@@ -89,6 +89,27 @@ check-macos:
 		exit 1; \
 	fi
 
+check-developer-tools:
+	@echo "Checking Apple developer tools..."
+	@DEVELOPER_DIR="$$(xcode-select -p 2>/dev/null || true)"; \
+	if [ -z "$$DEVELOPER_DIR" ]; then \
+		echo "Apple Command Line Tools are not installed."; \
+		echo "Run: xcode-select --install"; \
+		exit 1; \
+	fi; \
+	if echo "$$DEVELOPER_DIR" | grep -q '^/Library/Developer/CommandLineTools'; then \
+		MACOS_VERSION="$$(sw_vers -productVersion | awk -F. '{print $$1 "." $$2}')"; \
+		CLT_VERSION="$$(pkgutil --pkg-info=com.apple.pkg.CLTools_Executables 2>/dev/null | awk -F': ' '/version/ {print $$2}' | awk -F. '{print $$1 "." $$2}')"; \
+		if [ -n "$$CLT_VERSION" ] && awk -v clt="$$CLT_VERSION" -v mac="$$MACOS_VERSION" 'BEGIN { split(clt, c, "."); split(mac, m, "."); if (c[1] < m[1] || (c[1] == m[1] && c[2] < m[2])) exit 0; exit 1 }'; then \
+			echo "Apple Command Line Tools look older than your macOS version ($$CLT_VERSION vs $$MACOS_VERSION)."; \
+			echo "Update them from System Settings > General > Software Update."; \
+			echo "If nothing shows up there, run:"; \
+			echo "  sudo rm -rf /Library/Developer/CommandLineTools"; \
+			echo "  xcode-select --install"; \
+			exit 1; \
+		fi; \
+	fi
+
 zsh:
 	@echo "Checking login shell..."
 	@if [ "$$SHELL" = "/bin/zsh" ]; then \
@@ -123,6 +144,7 @@ homebrew: check-macos
 		printf '\n[ -f "$$HOME/.zprofile.mac-setup" ] && source "$$HOME/.zprofile.mac-setup"\n' >> "$(ZPROFILE)"; \
 		echo "Added Homebrew shellenv include to $(ZPROFILE)."; \
 	fi
+	@$(MAKE) check-developer-tools
 
 tap-hashicorp: homebrew
 	@echo "Ensuring HashiCorp tap is available..."
