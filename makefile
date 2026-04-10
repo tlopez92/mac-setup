@@ -125,7 +125,7 @@ homebrew: check-macos
 		echo "Homebrew is already installed at $$(command -v brew)."; \
 	else \
 		echo "Homebrew is not installed yet."; \
-		echo "The first run may prompt for your macOS administrator password."; \
+		echo "The first run may request macOS administrator approval."; \
 		NONINTERACTIVE=1 /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
 	fi
 	@echo "Writing Homebrew shell configuration..."

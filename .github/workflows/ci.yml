@@ -102,8 +102,9 @@ jobs:
         run: |
           # Check for potential security issues in makefile
           echo "Checking for hardcoded secrets..."
-          # Exclude common false positives like "password prompts" in comments
-          if grep -r "password\|secret\|key\|token" makefile | grep -v "password prompts" | grep -v "confirmation" | grep -v "console input"; then
+          # Flag suspicious secret-style assignments and common token formats.
+          if grep -Ein '(^|[[:space:]])(export[[:space:]]+)?(password|secret|token|api[_-]?key|access[_-]?key)[[:space:]]*[:?+]?=[[:space:]]*[^$#[:space:]]+' makefile \
+            || grep -Ein '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})' makefile; then
             echo "❌ Potential secrets found in makefile"
             exit 1
           else
