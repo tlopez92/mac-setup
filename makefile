@@ -24,7 +24,7 @@ CLOUD_TARGETS := aws terraform
 OPTIONAL_TARGETS := azure azure-functions docker windsurf
 
 .PHONY: help all core languages apps ai data cloud optional doctor \
-	check-macos zsh homebrew tap-fonts tap-hashicorp tap-mongodb tap-azure-functions \
+	check-macos zsh homebrew tap-hashicorp tap-mongodb tap-azure-functions \
 	oh-my-zsh link-oh-my-zsh-assets setup_shell setup_zshrc wezterm-config wezterm git font p10k \
 	zsh-autosuggestions zsh-syntax-highlighting eza zoxide docker azure azure-functions aws terraform \
 	raycast orbstack warp windsurf vscode claude-code github-copilot dotnet rider jetbrains-toolbox \
@@ -89,6 +89,8 @@ homebrew: check-macos
 	@if command -v brew >/dev/null 2>&1; then \
 		echo "Homebrew is already installed at $$(command -v brew)."; \
 	else \
+		echo "Homebrew is not installed yet."; \
+		echo "The first run may prompt for your macOS administrator password."; \
 		NONINTERACTIVE=1 /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; \
 	fi
 	@echo "Writing Homebrew shell configuration..."
@@ -108,10 +110,6 @@ homebrew: check-macos
 		echo "Added Homebrew shellenv include to $(ZPROFILE)."; \
 	fi
 
-tap-fonts: homebrew
-	@echo "Ensuring Homebrew font tap is available..."
-	@brew tap homebrew/cask-fonts >/dev/null
-
 tap-hashicorp: homebrew
 	@echo "Ensuring HashiCorp tap is available..."
 	@brew tap hashicorp/tap >/dev/null
@@ -130,7 +128,7 @@ wezterm: homebrew
 git: homebrew
 	$(call install_formula,git)
 
-font: tap-fonts
+font: homebrew
 	$(call install_cask,font-meslo-lg-nerd-font)
 
 p10k: homebrew

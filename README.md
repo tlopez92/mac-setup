@@ -72,6 +72,7 @@ make all
 That's it! The setup will automatically install and configure everything for you.
 
 The bootstrap is idempotent and avoids overwriting existing dotfiles. It manages shell additions through `~/.zprofile.mac-setup` and `~/.zshrc.mac-setup`, then sources those from your regular shell files.
+On a brand-new Mac, the first Homebrew install may prompt for your macOS administrator password.
 
 ## 📋 What Gets Installed
 
